@@ -3,6 +3,7 @@ import base64
 from datetime import datetime
 import os
 import shutil
+import cv2
 
 import numpy as np
 import socketio
@@ -12,9 +13,10 @@ from PIL import Image
 from flask import Flask
 from io import BytesIO
 
-from keras.models import load_model
-import h5py
-from keras import __version__ as keras_version
+import tensorflow as tf
+
+CROP_UP = 50
+CROP_DOWN = 30
 
 sio = socketio.Server()
 app = Flask(__name__)
@@ -44,7 +46,7 @@ class SimplePIController:
 
 
 controller = SimplePIController(0.1, 0.002)
-set_speed = 9
+set_speed = 22
 controller.set_desired(set_speed)
 
 
@@ -61,6 +63,11 @@ def telemetry(sid, data):
         imgString = data["image"]
         image = Image.open(BytesIO(base64.b64decode(imgString)))
         image_array = np.asarray(image)
+        image_array = image_array[CROP_UP:-CROP_DOWN,:,:]
+
+        cv2.imshow("si",image_array[...,::-1])
+        cv2.waitKey(1)
+
         steering_angle = float(model.predict(image_array[None, :, :, :], batch_size=1))
 
         throttle = controller.update(float(speed))
@@ -110,16 +117,8 @@ if __name__ == '__main__':
     )
     args = parser.parse_args()
 
-    # check that model Keras version is same as local Keras version
-    f = h5py.File(args.model, mode='r')
-    model_version = f.attrs.get('keras_version')
-    keras_version = str(keras_version).encode('utf8')
 
-    if model_version != keras_version:
-        print('You are using Keras version ', keras_version,
-              ', but the model was built using ', model_version)
-
-    model = load_model(args.model)
+    model = tf.keras.models.load_model(args.model)
 
     if args.image_folder != '':
         print("Creating image folder at {}".format(args.image_folder))
