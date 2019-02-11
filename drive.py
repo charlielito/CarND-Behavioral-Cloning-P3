@@ -15,14 +15,6 @@ from io import BytesIO
 
 import tensorflow as tf
 
-CROP_UP = 50
-CROP_DOWN = 30
-
-sio = socketio.Server()
-app = Flask(__name__)
-model = None
-prev_image_array = None
-
 
 class SimplePIController:
     def __init__(self, Kp, Ki):
@@ -39,16 +31,21 @@ class SimplePIController:
         # proportional error
         self.error = self.set_point - measurement
 
-        # integral error
-        self.integral += self.error
+        # integral error only if has not exploded
+        if abs(self.Ki * self.integral) < 100:
+            self.integral += self.error
 
         return self.Kp * self.error + self.Ki * self.integral
 
+CROP_UP = 50
+CROP_DOWN = 30
+
+sio = socketio.Server()
+app = Flask(__name__)
+model = None
+prev_image_array = None
 
 controller = SimplePIController(0.1, 0.002)
-set_speed = 22
-controller.set_desired(set_speed)
-
 
 @sio.on('telemetry')
 def telemetry(sid, data):
@@ -65,8 +62,8 @@ def telemetry(sid, data):
         image_array = np.asarray(image)
         image_array = image_array[CROP_UP:-CROP_DOWN,:,:]
 
-        cv2.imshow("si",image_array[...,::-1])
-        cv2.waitKey(1)
+        #cv2.imshow("si",image_array[...,::-1])
+        #cv2.waitKey(1)
 
         steering_angle = float(model.predict(image_array[None, :, :, :], batch_size=1))
 
@@ -100,7 +97,6 @@ def send_control(steering_angle, throttle):
         },
         skip_sid=True)
 
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Remote Driving')
     parser.add_argument(
@@ -108,6 +104,15 @@ if __name__ == '__main__':
         type=str,
         help='Path to model h5 file. Model should be on the same path.'
     )
+
+    parser.add_argument(
+        'speed',
+        type=float,
+        nargs='?',
+        default=22.0,
+        help='Desired speed'
+    )
+
     parser.add_argument(
         'image_folder',
         type=str,
@@ -115,10 +120,12 @@ if __name__ == '__main__':
         default='',
         help='Path to image folder. This is where the images from the run will be saved.'
     )
+    
     args = parser.parse_args()
 
-
     model = tf.keras.models.load_model(args.model)
+
+    controller.set_desired(args.speed)
 
     if args.image_folder != '':
         print("Creating image folder at {}".format(args.image_folder))
