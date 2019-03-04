@@ -64,8 +64,11 @@ def telemetry(sid, data):
 
         pred = model(dict(input=[image_array]))
 
-        #cv2.imshow("si",image_array[...,::-1])
-        #cv2.waitKey(1)
+        if "image" in pred:
+            image = pred["image"][0][...,::-1].astype(np.uint8)
+            cv2.imshow("si",image)
+            # cv2.imshow("si",image_array)
+            cv2.waitKey(1)
 
         # steering_angle = float(model.predict(image_array[None, :, :, :], batch_size=1))
         steering_angle = pred["steering"][0][0]
@@ -127,7 +130,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # model = tf.keras.models.load_model(args.model)
-    model = tf.contrib.predictor.from_saved_model("export/test_exporter/1551158525") 
+    model = tf.contrib.predictor.from_saved_model(args.model) 
 
     controller.set_desired(args.speed)
 
