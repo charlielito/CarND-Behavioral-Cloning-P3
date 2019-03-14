@@ -15,6 +15,16 @@ from io import BytesIO
 
 import tensorflow as tf
 
+def draw_activations(img, mask = None, mask_multiplier = 4.0):
+
+    if mask is not None:
+
+        mask *= 255 * mask_multiplier
+        if (img.shape != mask.shape):
+            img = cv2.resize(img, (mask.shape[1], mask.shape[0]))
+        img[..., 2] = mask[..., 0]
+
+    return img
 
 class SimplePIController:
     def __init__(self, Kp, Ki):
@@ -65,8 +75,13 @@ def telemetry(sid, data):
         pred = model(dict(input=[image_array]))
 
         if "image" in pred:
-            image = pred["image"][0][...,::-1].astype(np.uint8)
-            cv2.imshow("si",image)
+            # print(pred["image"][0])
+            # print(image_array[CROP_UP:-CROP_DOWN,:,:])
+            model_image = pred["image"][0][...,::-1].astype(np.uint8)
+            if "mask" in pred:
+                mask = pred["mask"][0]
+                model_image = draw_activations(model_image, mask=mask)
+            cv2.imshow("si",model_image)
             # cv2.imshow("si",image_array)
             cv2.waitKey(1)
 
