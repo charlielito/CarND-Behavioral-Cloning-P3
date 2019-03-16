@@ -11,5 +11,9 @@ crop_up: 50
 crop_down: 30
 
 # Training
-epochs: 15
+epochs: 1
 batch_size: 32
+steer_correction: 0.2
+
+# Dataset
+dataset: data_mine
