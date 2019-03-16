@@ -10,12 +10,12 @@ Self driving nanodegree Udacity
 [//]: # (Image References)
 
 [image1]: ./results/nvidia_net.png "Model Visualization"
-[image2]: ./examples/placeholder.png "Grayscaling"
-[image3]: ./examples/placeholder_small.png "Recovery Image"
-[image4]: ./examples/placeholder_small.png "Recovery Image"
-[image5]: ./examples/placeholder_small.png "Recovery Image"
-[image6]: ./examples/placeholder_small.png "Normal Image"
-[image7]: ./examples/placeholder_small.png "Flipped Image"
+[image2]: ./results/video.gif "Video"
+[image3]: ./results/losses.png "Loss graph"
+[image4]: ./results/mae.png "MAE graph"
+[image5]: ./results/left.png "Left Image"
+[image6]: ./results/center.png "Normal Image"
+[image7]: ./results/right.png "Right Image"
 
 ## Rubric Points
 ### Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
@@ -110,6 +110,9 @@ The final step was to run the simulator to see how well the car was driving arou
 
 At the end of the process, the vehicle is able to drive autonomously around the track without leaving the road.
 
+
+![alt text][image2]
+
 #### 2. Final Model Architecture
 
 The final model architecture (model.py lines 18-24) consisted of a convolution neural network with the following layers and layer sizes ...
@@ -137,10 +140,7 @@ To augment the data sat, I also flipped images and angles thinking that this wou
 ![alt text][image6]
 ![alt text][image7]
 
-Etc ....
-
 After the collection process, I had X number of data points. I then preprocessed this data by ...
-
 
 I finally randomly shuffled the data set and put Y% of the data into a validation set. 
 
