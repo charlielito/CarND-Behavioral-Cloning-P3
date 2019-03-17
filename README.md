@@ -38,7 +38,7 @@ My project includes the following files:
 #### 2. Functional code
 Using the Udacity provided simulator and my drive_estimator.py file, the car can be driven autonomously around the track by executing
 ```sh
-python drive.py export/nvidia_dataset/1552541693 22
+python drive_estimator.py export/nvidia_dataset/1552541693 22
 ```
 where 22 is the desired velocity set point.
 
